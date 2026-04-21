@@ -449,9 +449,22 @@ function imprimirComandaMesero() {
     const db = firebase.database();
 
     function seleccionarRol(rol) {
-        document.body.classList.add('rol-' + rol);
-        document.getElementById('modal-rol').style.display = 'none';
-        iniciarSincronizacionNube();
+        let clave = prompt("Ingrese clave de acceso:");
+        if(!clave) return;
+
+        const CLAVE_MESERO = "1111";
+        const CLAVE_CAJA = "1234";
+
+        if(
+            (rol === 'mesero' && clave === CLAVE_MESERO) ||
+            (rol === 'caja' && clave === CLAVE_CAJA)
+        ) {
+            document.body.classList.add('rol-' + rol);
+            document.getElementById('modal-rol').style.display = 'none';
+            iniciarSincronizacionNube();
+        } else {
+            alert("❌ Clave incorrecta");
+        }
     }
 
     function sincronizarNube(tipo) {
