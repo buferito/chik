@@ -11,16 +11,17 @@ function imprimirComandaMesero() {
     if(!mesa || !mesasAbiertas[mesa]) return alert("Selecciona una cuenta válida.");
 
     let itemsMesa = mesasAbiertas[mesa];
+    let printContainer = document.getElementById('print-ticket-pedido');
     let fecha = new Date().toLocaleString('es-EC');
 
     let tckHTML = `
-        <div style="text-align:center;">
+        <div class="tck-header">
             <div style="font-size:1.3em; font-weight:bold;">COMANDA DE COCINA</div>
             <div>${config.titulo}</div>
             <div style="font-size:0.8em;">${fecha}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
             <div style="font-size:1.2em;">MESA: ${mesa}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
         </div>
     `;
 
@@ -33,25 +34,17 @@ function imprimirComandaMesero() {
     });
 
     tckHTML += `
-        <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+        <div class="tck-line"></div>
         <div style="text-align:center; font-size:0.9em;">--- FIN COMANDA ---</div>
     `;
 
-    let ventana = window.open('', '_blank');
-    ventana.document.write(`
-        <html>
-        <head>
-            <title>Comanda</title>
-            <style>
-                body { font-family: 'Courier New', monospace; padding: 10px; margin: 0; font-size: 14px; }
-                img { max-width: 100px; display: block; margin: 0 auto; }
-            </style>
-        </head>
-        <body>${tckHTML}</body>
-        </html>
-    `);
-    ventana.document.close();
-    setTimeout(() => { ventana.focus(); ventana.print(); ventana.close(); }, 300);
+    printContainer.innerHTML = tckHTML;
+
+    document.body.classList.add('printing-ticket');
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing-ticket');
+    }, 150);
 }
 
 </script>
@@ -61,16 +54,17 @@ function imprimirComandaMesero() {
     if(!mesa || !mesasAbiertas[mesa]) return alert("Selecciona una cuenta válida.");
 
     let itemsMesa = mesasAbiertas[mesa];
+    let printContainer = document.getElementById('print-ticket-pedido');
     let fecha = new Date().toLocaleString('es-EC');
 
     let tckHTML = `
-        <div style="text-align:center;">
+        <div class="tck-header">
             <div style="font-size:1.3em; font-weight:bold;">COMANDA DE COCINA</div>
             <div>${config.titulo}</div>
             <div style="font-size:0.8em;">${fecha}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
             <div style="font-size:1.2em;">MESA: ${mesa}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
         </div>
     `;
 
@@ -83,25 +77,17 @@ function imprimirComandaMesero() {
     });
 
     tckHTML += `
-        <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+        <div class="tck-line"></div>
         <div style="text-align:center; font-size:0.9em;">--- FIN COMANDA ---</div>
     `;
 
-    let ventana = window.open('', '_blank');
-    ventana.document.write(`
-        <html>
-        <head>
-            <title>Comanda</title>
-            <style>
-                body { font-family: 'Courier New', monospace; padding: 10px; margin: 0; font-size: 14px; }
-                img { max-width: 100px; display: block; margin: 0 auto; }
-            </style>
-        </head>
-        <body>${tckHTML}</body>
-        </html>
-    `);
-    ventana.document.close();
-    setTimeout(() => { ventana.focus(); ventana.print(); ventana.close(); }, 300);
+    printContainer.innerHTML = tckHTML;
+
+    document.body.classList.add('printing-ticket');
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing-ticket');
+    }, 150);
 }
 
 </script>
@@ -280,16 +266,6 @@ function imprimirComandaMesero() {
     </button>
 </div>
 
-<div id="modal-clave" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-    <h2 style="color:white; margin-bottom:20px;">Ingrese Clave</h2>
-    <input type="password" id="input-clave" placeholder="••••"
-        style="padding:15px; border-radius:10px; border:none; font-size:1.2rem; text-align:center; margin-bottom:15px; width:250px;">
-    <div style="display:flex; gap:10px;">
-        <button onclick="validarClave()" style="padding:12px 20px; border:none; border-radius:10px; background:#28a745; color:white;">Ingresar</button>
-        <button onclick="cerrarModalClave()" style="padding:12px 20px; border:none; border-radius:10px; background:#dc3545; color:white;">Cancelar</button>
-    </div>
-</div>
-
 <header>
     <div class="top-controls">
         <div id="fs-wrapper" class="control-item">
@@ -447,6 +423,10 @@ function imprimirComandaMesero() {
         <button class="solo-caja" onclick="imprimirTicketPedido()" style="background:#2ecc71; color:white; border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer; font-size: 1rem; margin-bottom: 10px;">
             <i class="fas fa-print"></i> COBRAR E IMPRIMIR MESA
         </button>
+
+        <button class="solo-mesero" onclick="imprimirComandaMesero()" style="background:#007bff; color:white; border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer; font-size: 1rem; margin-bottom: 10px;">
+            <i class="fas fa-print"></i> IMPRIMIR COMANDA (COCINA)
+        </button>
         <button onclick="cerrarCarrito()" style="background:#888; color:white; border:none; padding:10px; width:100%; border-radius:10px; cursor:pointer;">Seguir Agregando / Cerrar</button>
     </div>
 </div>
@@ -468,38 +448,24 @@ function imprimirComandaMesero() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let rolPendiente = null;
+    function seleccionarRol(rol) {
+        let clave = prompt("Ingrese clave de acceso:");
+        if(!clave) return;
 
-function seleccionarRol(rol) {
-    rolPendiente = rol;
-    document.getElementById('modal-clave').style.display = 'flex';
-    document.getElementById('input-clave').value = '';
-    setTimeout(()=>document.getElementById('input-clave').focus(),100);
-}
+        const CLAVE_MESERO = "1111";
+        const CLAVE_CAJA = "1234";
 
-function validarClave() {
-    let clave = document.getElementById('input-clave').value;
-
-    const CLAVE_MESERO = "1111";
-    const CLAVE_CAJA = "1234";
-
-    if(
-        (rolPendiente === 'mesero' && clave === CLAVE_MESERO) ||
-        (rolPendiente === 'caja' && clave === CLAVE_CAJA)
-    ) {
-        document.body.classList.add('rol-' + rolPendiente);
-        document.getElementById('modal-rol').style.display = 'none';
-        document.getElementById('modal-clave').style.display = 'none';
-        iniciarSincronizacionNube();
-    } else {
-        alert("❌ Clave incorrecta");
+        if(
+            (rol === 'mesero' && clave === CLAVE_MESERO) ||
+            (rol === 'caja' && clave === CLAVE_CAJA)
+        ) {
+            document.body.classList.add('rol-' + rol);
+            document.getElementById('modal-rol').style.display = 'none';
+            iniciarSincronizacionNube();
+        } else {
+            alert("❌ Clave incorrecta");
+        }
     }
-}
-
-function cerrarModalClave(){
-    document.getElementById('modal-clave').style.display='none';
-}
-
 
     function sincronizarNube(tipo) {
         if(tipo === 'mesas') db.ref('sistema/mesasAbiertas').set(mesasAbiertas);
@@ -690,7 +656,7 @@ function cerrarModalClave(){
         let modal = document.getElementById('product-modal');
         let html = `
             <img src="${p.img}" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;">
-            <h2 style="color:var(--color-principal); margin:0;">${p.nom}</h2>
+            <h2 style="color:var(--color-principal); margin-bottom:5px;">${p.nom}</h2>
             <h3 style="color:var(--col-prod-precio); margin-top:0;">$${p.pre}</h3>
             <div class="quick-input-group">
                 <label><b>Mesa / Cliente:</b></label>
@@ -839,11 +805,11 @@ function cerrarModalClave(){
         let fecha = new Date().toLocaleString('es-EC');
         let total = 0;
         
-        let tckHTML = `<div class="tck-header">${logo ? `<img src="${logo}" style="max-width:100px; margin:0; display:block; margin-inline:auto;">` : ''}<div style="font-size:1.5em; text-transform:uppercase;">${config.titulo}</div><div style="font-weight:normal; font-size:0.8em;">${config.dir}</div><div style="font-weight:normal; font-size:0.8em;">${fecha}</div><div class="tck-line"></div><div style="font-size:1.2em;">MESA / CLIENTE: <br> ${mesa}</div><div class="tck-line"></div></div>`;
+        let tckHTML = `<div class="tck-header">${logo ? `<img src="${logo}" style="max-width:100px; margin-bottom:5px; display:block; margin-inline:auto;">` : ''}<div style="font-size:1.5em; text-transform:uppercase;">${config.titulo}</div><div style="font-weight:normal; font-size:0.8em;">${config.dir}</div><div style="font-weight:normal; font-size:0.8em;">${fecha}</div><div class="tck-line"></div><div style="font-size:1.2em;">MESA / CLIENTE: <br> ${mesa}</div><div class="tck-line"></div></div>`;
         itemsMesa.forEach(item => {
             let subtotal = item.pre * item.cant; total += subtotal;
             tckHTML += `<div style="margin-bottom:8px;"><div>${item.cant}x ${item.nom}</div><div style="display:flex; justify-content:space-between; color:#333; font-size:0.9em;"><span>$${item.pre.toFixed(2)} c/u</span><span>$${subtotal.toFixed(2)}</span></div></div>`;
-    });
+        });
         tckHTML += `<div class="tck-line"></div><div class="tck-total">TOTAL: $${total.toFixed(2)}</div><div class="tck-line"></div><div style="text-align:center; font-size:0.8em; margin-top:10px;">¡Gracias por su consumo!</div>`;
         printContainer.innerHTML = tckHTML;
         
@@ -906,15 +872,15 @@ function cerrarModalClave(){
         }
     }
 
-    function reimprimirTicket() {
+    function reimprimirTicket(fechaId) {
         let pedido = historialPedidos.find(p => p.fecha === fechaId);
         if(!pedido) return alert("No se encontró el pedido.");
         let printContainer = document.getElementById('print-ticket-pedido');
-        let tckHTML = `<div class="tck-header">${logo ? `<img src="${logo}" style="max-width:100px; margin:0; display:block; margin-inline:auto;">` : ''}<div style="font-size:1.5em; text-transform:uppercase;">${config.titulo}</div><div style="font-weight:normal; font-size:0.8em;">${config.dir}</div><div style="font-weight:normal; font-size:0.8em;">${new Date(pedido.fecha).toLocaleString('es-EC')}</div><div class="tck-line"></div><div style="font-size:1.2em; font-weight:bold;">REIMPRESIÓN DE TICKET</div><div style="font-size:1.1em;">MESA / CLIENTE: ${pedido.mesa}</div><div class="tck-line"></div></div>`;
+        let tckHTML = `<div class="tck-header">${logo ? `<img src="${logo}" style="max-width:100px; margin-bottom:5px; display:block; margin-inline:auto;">` : ''}<div style="font-size:1.5em; text-transform:uppercase;">${config.titulo}</div><div style="font-weight:normal; font-size:0.8em;">${config.dir}</div><div style="font-weight:normal; font-size:0.8em;">${new Date(pedido.fecha).toLocaleString('es-EC')}</div><div class="tck-line"></div><div style="font-size:1.2em; font-weight:bold;">REIMPRESIÓN DE TICKET</div><div style="font-size:1.1em;">MESA / CLIENTE: ${pedido.mesa}</div><div class="tck-line"></div></div>`;
         pedido.items.forEach(item => {
             let subtotal = item.pre * item.cant;
             tckHTML += `<div style="margin-bottom:8px;"><div>${item.cant}x ${item.nom}</div><div style="display:flex; justify-content:space-between; color:#333; font-size:0.9em;"><span>$${item.pre.toFixed(2)} c/u</span><span>$${subtotal.toFixed(2)}</span></div></div>`;
-    });
+        });
         tckHTML += `<div class="tck-line"></div><div class="tck-total">TOTAL: $${pedido.total.toFixed(2)}</div><div class="tck-line"></div><div style="text-align:center; font-size:0.8em; margin-top:10px;">Este documento es una copia de una venta anterior.</div>`;
         printContainer.innerHTML = tckHTML;
         document.body.classList.add('printing-ticket');
@@ -1043,16 +1009,17 @@ function imprimirComandaMesero() {
     if(!mesa || !mesasAbiertas[mesa]) return alert("Selecciona una cuenta válida.");
 
     let itemsMesa = mesasAbiertas[mesa];
+    let printContainer = document.getElementById('print-ticket-pedido');
     let fecha = new Date().toLocaleString('es-EC');
 
     let tckHTML = `
-        <div style="text-align:center;">
+        <div class="tck-header">
             <div style="font-size:1.3em; font-weight:bold;">COMANDA DE COCINA</div>
             <div>${config.titulo}</div>
             <div style="font-size:0.8em;">${fecha}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
             <div style="font-size:1.2em;">MESA: ${mesa}</div>
-            <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+            <div class="tck-line"></div>
         </div>
     `;
 
@@ -1065,25 +1032,17 @@ function imprimirComandaMesero() {
     });
 
     tckHTML += `
-        <div style="border-bottom:1px dashed #000; margin:5px 0;"></div>
+        <div class="tck-line"></div>
         <div style="text-align:center; font-size:0.9em;">--- FIN COMANDA ---</div>
     `;
 
-    let ventana = window.open('', '_blank');
-    ventana.document.write(`
-        <html>
-        <head>
-            <title>Comanda</title>
-            <style>
-                body { font-family: 'Courier New', monospace; padding: 10px; margin: 0; font-size: 14px; }
-                img { max-width: 100px; display: block; margin: 0 auto; }
-            </style>
-        </head>
-        <body>${tckHTML}</body>
-        </html>
-    `);
-    ventana.document.close();
-    setTimeout(() => { ventana.focus(); ventana.print(); ventana.close(); }, 300);
+    printContainer.innerHTML = tckHTML;
+
+    document.body.classList.add('printing-ticket');
+    setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing-ticket');
+    }, 150);
 }
 
 </script>
