@@ -43,8 +43,10 @@ function imprimirComandaMesero() {
     document.body.classList.add('printing-ticket');
     setTimeout(() => {
         window.print();
-        document.body.classList.remove('printing-ticket');
-    }, 150);
+        setTimeout(() => {
+            document.body.classList.remove('printing-ticket');
+        }, 1000);
+    }, 500);
 }
 
 </script>
@@ -86,8 +88,10 @@ function imprimirComandaMesero() {
     document.body.classList.add('printing-ticket');
     setTimeout(() => {
         window.print();
-        document.body.classList.remove('printing-ticket');
-    }, 150);
+        setTimeout(() => {
+            document.body.classList.remove('printing-ticket');
+        }, 1000);
+    }, 500);
 }
 
 </script>
@@ -248,7 +252,7 @@ function imprimirComandaMesero() {
         @media print {
             @page { margin: 0; }
             html, body { height: auto !important; min-height: auto !important; display: block !important; overflow: visible !important; background: #fff !important; }
-            #admin-panel, .nav-container, .top-controls, .admin-btns, #login-modal, #product-modal, #cart-modal, #btn-flotante-carrito, footer, header, main, #modal-rol { display: none !important; }
+            #admin-panel, .nav-container, .top-controls, .admin-btns, #login-modal, #role-pass-modal, #product-modal, #cart-modal, #btn-flotante-carrito, footer, header, main, #modal-rol { display: none !important; }
             body.printing-carta #print-carta-menu { display: block !important; visibility: visible !important; position: static !important; z-index: auto !important; padding: 10mm !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body.printing-ticket #print-ticket-pedido { display: block !important; visibility: visible !important; position: static !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
@@ -264,6 +268,18 @@ function imprimirComandaMesero() {
     <button class="btn-rol btn-caja" onclick="seleccionarRol('caja')">
         <i class="fas fa-cash-register"></i> SOY CAJA / ADMIN
     </button>
+</div>
+
+<div id="role-pass-modal" class="modal" style="z-index: 10000;">
+    <div class="modal-content" style="text-align:center;">
+        <h3 id="role-pass-title">Ingrese Clave</h3>
+        <div style="position: relative; width: 100%; margin-bottom: 15px;">
+            <input type="password" id="role-pass-val" placeholder="Clave de acceso" style="margin-bottom: 0; padding-right: 40px;">
+            <i class="fas fa-eye" id="toggle-role-pass" onclick="toggleRolePassword()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.2rem;"></i>
+        </div>
+        <button class="btn-save" onclick="verificarRolClave()">ENTRAR</button>
+        <button onclick="cerrarRolePass()" style="margin-top:10px; background:none; border:none; color:red; cursor:pointer;">Cancelar</button>
+    </div>
 </div>
 
 <header>
@@ -304,7 +320,6 @@ function imprimirComandaMesero() {
 <section id="admin-panel">
     <div class="admin-section">
         <h3>🏠 Identidad y Estilo</h3>
-        </button>
         <label>Nombre del Negocio:</label><input type="text" id="adm-titulo">
         <label>Título en Pestaña:</label><input type="text" id="adm-tab-title">
         <label>Texto Copyright:</label><input type="text" id="adm-copy">
@@ -331,6 +346,15 @@ function imprimirComandaMesero() {
             <div><label>Precio Prod:</label><div id="pv-p" class="color-preview-box"></div><input type="color" id="adm-col-p" oninput="actualizarConfig()"></div>
             <div><label>Menú Cat:</label><div id="pv-cat" class="color-preview-box"></div><input type="color" id="adm-col-cat" oninput="actualizarConfig()"></div>
         </div>
+    </div>
+
+    <div class="admin-section" style="background:#f4f6f9; border: 1px solid #d1d8e0; padding:15px; border-radius:15px;">
+        <h3>🔒 Claves de Acceso</h3>
+        <label>Clave para Mesero:</label>
+        <input type="text" id="adm-pass-mesero" placeholder="Ej. 1111">
+        <label>Clave para Caja / Admin:</label>
+        <input type="text" id="adm-pass-caja" placeholder="Ej. 1234">
+        <button class="btn-save" onclick="actualizarConfig()" style="margin-top:10px; background:#2ecc71;">GUARDAR CLAVES</button>
     </div>
 
     <div class="admin-section">
@@ -396,7 +420,10 @@ function imprimirComandaMesero() {
 <div id="login-modal" class="modal">
     <div class="modal-content" style="text-align:center;">
         <h3>Admin</h3>
-        <input type="password" id="pass-val" placeholder="Pass">
+        <div style="position: relative; width: 100%; margin-bottom: 15px;">
+            <input type="password" id="pass-val" placeholder="Pass" style="margin-bottom: 0; padding-right: 40px;">
+            <i class="fas fa-eye" id="toggle-pass" onclick="togglePassword()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666; font-size: 1.2rem;"></i>
+        </div>
         <button class="btn-save" onclick="login()">ENTRAR</button>
         <button onclick="cerrarLogin()" style="margin-top:10px; background:none; border:none; color:red; cursor:pointer;">Cancelar</button>
     </div>
@@ -448,22 +475,50 @@ function imprimirComandaMesero() {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let rolSeleccionadoTemp = ''; // Variable temporal para guardar el rol elegido
+
     function seleccionarRol(rol) {
-        let clave = prompt("Ingrese clave de acceso:");
+        rolSeleccionadoTemp = rol;
+        document.getElementById('role-pass-title').innerText = "Clave " + (rol === 'mesero' ? 'Mesero' : 'Caja/Admin');
+        document.getElementById('role-pass-val').value = '';
+        document.getElementById('role-pass-modal').style.display = 'flex';
+    }
+
+    function verificarRolClave() {
+        let clave = document.getElementById('role-pass-val').value;
         if(!clave) return;
 
-        const CLAVE_MESERO = "1111";
-        const CLAVE_CAJA = "1234";
+        const CLAVE_MESERO = config.passMesero;
+        const CLAVE_CAJA = config.passCaja;
 
         if(
-            (rol === 'mesero' && clave === CLAVE_MESERO) ||
-            (rol === 'caja' && clave === CLAVE_CAJA)
+            (rolSeleccionadoTemp === 'mesero' && clave === CLAVE_MESERO) ||
+            (rolSeleccionadoTemp === 'caja' && clave === CLAVE_CAJA)
         ) {
-            document.body.classList.add('rol-' + rol);
+            document.body.classList.add('rol-' + rolSeleccionadoTemp);
+            document.getElementById('role-pass-modal').style.display = 'none';
             document.getElementById('modal-rol').style.display = 'none';
             iniciarSincronizacionNube();
         } else {
             alert("❌ Clave incorrecta");
+        }
+    }
+
+    function cerrarRolePass() {
+        document.getElementById('role-pass-modal').style.display = 'none';
+    }
+
+    function toggleRolePassword() {
+        let passInput = document.getElementById('role-pass-val');
+        let icon = document.getElementById('toggle-role-pass');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
         }
     }
 
@@ -533,10 +588,17 @@ function imprimirComandaMesero() {
 
     let categorias = JSON.parse(localStorage.getItem('cats')) || ["Entradas"];
     let productos = JSON.parse(localStorage.getItem('prods')) || [];
+    
+    // MODIFICADO: Añadido soporte para claves dinámicas
     let config = JSON.parse(localStorage.getItem('conf')) || { 
         titulo: "Negocio", tabTitle: "Menú", copy: "© 2026", dir: "", telFijo: "", telCel: "", urlQR: "", 
-        colBg: "#ffffff", colMain: "#d63384", colT: "#333333", colD: "#666666", colP: "#d63384", colCat: "#0056b3", pass: "1234", fontFamily: "'Poppins', sans-serif"
+        colBg: "#ffffff", colMain: "#d63384", colT: "#333333", colD: "#666666", colP: "#d63384", colCat: "#0056b3", pass: "1234", passMesero: "1111", passCaja: "1234", fontFamily: "'Poppins', sans-serif"
     };
+    
+    // Ajuste de seguridad por si ya había datos guardados viejos sin estas variables
+    if (!config.passMesero) config.passMesero = "1111";
+    if (!config.passCaja) config.passCaja = config.pass || "1234";
+
     let logo = localStorage.getItem('logo') || "";
     let logoFooter = localStorage.getItem('logoFooter') || "";
     let favicon = localStorage.getItem('favicon') || "";
@@ -587,6 +649,10 @@ function imprimirComandaMesero() {
         document.getElementById('pv-p').style.backgroundColor = config.colP;
         document.getElementById('adm-col-cat').value = config.colCat;
         document.getElementById('pv-cat').style.backgroundColor = config.colCat;
+
+        // Cargar las claves en los inputs del panel de administración
+        document.getElementById('adm-pass-mesero').value = config.passMesero;
+        document.getElementById('adm-pass-caja').value = config.passCaja;
 
         if(logo) { let imgH = document.getElementById('logo-main'); imgH.src = logo; imgH.style.display = 'block'; }
         if(logoFooter) { let imgF = document.getElementById('logo-footer'); imgF.src = logoFooter; imgF.style.display = 'block'; }
@@ -816,20 +882,22 @@ function imprimirComandaMesero() {
         document.body.classList.add('printing-ticket');
         setTimeout(() => {
             window.print();
-            document.body.classList.remove('printing-ticket');
-            if(confirm("¿Cobrar mesa, guardar venta en el historial y cerrarla?")) {
-                historialPedidos.push({ fecha: new Date().toISOString(), mesa: mesa, items: [...itemsMesa], total: total });
-                localStorage.setItem('historialPedidos', JSON.stringify(historialPedidos));
-                sincronizarNube('historial'); // MODIFICACION FIREBASE
-                
-                delete mesasAbiertas[mesa]; // Cierra la cuenta de esta mesa localmente
-                localStorage.setItem('mesasAbiertas', JSON.stringify(mesasAbiertas));
-                sincronizarNube('mesas'); // MODIFICACION FIREBASE
-                
-                actualizarBotonCarritoUI(); 
-                if(Object.keys(mesasAbiertas).length === 0) cerrarCarrito(); else abrirCarrito();
-            }
-        }, 150);
+            setTimeout(() => {
+                document.body.classList.remove('printing-ticket');
+                if(confirm("¿Cobrar mesa, guardar venta en el historial y cerrarla?")) {
+                    historialPedidos.push({ fecha: new Date().toISOString(), mesa: mesa, items: [...itemsMesa], total: total });
+                    localStorage.setItem('historialPedidos', JSON.stringify(historialPedidos));
+                    sincronizarNube('historial'); // MODIFICACION FIREBASE
+                    
+                    delete mesasAbiertas[mesa]; // Cierra la cuenta de esta mesa localmente
+                    localStorage.setItem('mesasAbiertas', JSON.stringify(mesasAbiertas));
+                    sincronizarNube('mesas'); // MODIFICACION FIREBASE
+                    
+                    actualizarBotonCarritoUI(); 
+                    if(Object.keys(mesasAbiertas).length === 0) cerrarCarrito(); else abrirCarrito();
+                }
+            }, 1000);
+        }, 500);
     }
 
     function generarReporte() {
@@ -884,7 +952,12 @@ function imprimirComandaMesero() {
         tckHTML += `<div class="tck-line"></div><div class="tck-total">TOTAL: $${pedido.total.toFixed(2)}</div><div class="tck-line"></div><div style="text-align:center; font-size:0.8em; margin-top:10px;">Este documento es una copia de una venta anterior.</div>`;
         printContainer.innerHTML = tckHTML;
         document.body.classList.add('printing-ticket');
-        setTimeout(() => { window.print(); document.body.classList.remove('printing-ticket'); }, 150);
+        setTimeout(() => { 
+            window.print(); 
+            setTimeout(() => { 
+                document.body.classList.remove('printing-ticket'); 
+            }, 1000); 
+        }, 500);
     }
 
     async function guardarPlatillo() { let n=document.getElementById('p-nom').value, p=document.getElementById('p-pre').value, d=document.getElementById('p-desc').value, c=document.getElementById('p-cat').value, sub=document.getElementById('p-subcat').value.trim(), f=document.getElementById('p-img').files[0], ei=parseInt(document.getElementById('edit-index').value); if(!n||!p) return; let img = (ei>-1)?productos[ei].img:""; if(f) img = await comprimirImagen(f); let np={nom:n, pre:p, desc:d, cat:c, subcat:sub, img:img}; if(ei>-1) productos[ei]=np; else productos.push(np); localStorage.setItem('prods', JSON.stringify(productos)); sincronizarNube('menu'); resetForm(); render(); }
@@ -909,6 +982,11 @@ function imprimirComandaMesero() {
         config.colP = document.getElementById('adm-col-p').value; 
         config.colCat = document.getElementById('adm-col-cat').value; 
         config.fontFamily = document.getElementById('adm-font').value;
+        
+        // Asignación de las nuevas claves
+        config.passMesero = document.getElementById('adm-pass-mesero').value; 
+        config.passCaja = document.getElementById('adm-pass-caja').value; 
+        config.pass = config.passCaja; // Sincroniza el acceso del switch con la clave de caja
         
         localStorage.setItem('conf', JSON.stringify(config)); 
         sincronizarNube('menu'); // MODIFICACION FIREBASE
@@ -989,6 +1067,20 @@ function imprimirComandaMesero() {
             alert("Clave incorrecta"); 
         }
     }
+
+    function togglePassword() {
+        let passInput = document.getElementById('pass-val');
+        let icon = document.getElementById('toggle-pass');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
     
     function cerrarLogin() { 
         document.getElementById('pass-val').value = ''; 
@@ -1041,8 +1133,10 @@ function imprimirComandaMesero() {
     document.body.classList.add('printing-ticket');
     setTimeout(() => {
         window.print();
-        document.body.classList.remove('printing-ticket');
-    }, 150);
+        setTimeout(() => {
+            document.body.classList.remove('printing-ticket');
+        }, 1000);
+    }, 500);
 }
 
 </script>
